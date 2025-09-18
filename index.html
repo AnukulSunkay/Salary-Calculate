@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Salary Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f8f8f8;
+    }
+    .calculator {
+      max-width: 600px;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .row label {
+      width: 160px;
+      font-weight: bold;
+    }
+    .row input {
+      width: 100px;
+      padding: 5px;
+      margin-right: 10px;
+      background: #d8f5d8;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .result {
+      font-weight: bold;
+      color: #333;
+    }
+    .total-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: black;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .exchange {
+      margin-top: 10px;
+      color: gray;
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h2>💰 Salary Calculator</h2>
+
+    <div class="row">
+      <label>Salary</label>
+      <input id="salary" type="number" value="1000">
+    </div>
+
+    <div class="row">
+      <label>Day shift</label>
+      <input id="dayShift" type="number" value="0">
+      <span class="result" id="dayShiftResult"></span>
+    </div>
+
+    <div class="row">
+      <label>Night shift</label>
+      <input id="nightShift" type="number" value="15">
+      <span class="result" id="nightShiftResult"></span>
+    </div>
+
+    <div class="row">
+      <label>Allowan</label>
+      <input id="allowan" type="number" value="200">
+    </div>
+
+    <div class="row">
+      <label>Bonus</label>
+      <input id="bonus" type="number" value="0">
+    </div>
+
+    <div class="row">
+      <label>Other</label>
+      <input id="other" type="number" value="0">
+    </div>
+
+    <div class="row">
+      <label>OT 1.5 (M-F)</label>
+      <input id="ot15" type="number" value="1">
+      <span class="result" id="ot15Result"></span>
+    </div>
+
+    <div class="row">
+      <label>OT 2.0 (S-S)</label>
+      <input id="ot20" type="number" value="1">
+      <span class="result" id="ot20Result"></span>
+    </div>
+
+    <div class="row">
+      <label>Holiday (work)</label>
+      <input id="holiday" type="number" value="1">
+      <span class="result" id="holidayResult"></span>
+    </div>
+
+    <div class="row">
+        <label>Holiday (none)</label>
+        <input id="holidaynon" type="number" value="1">
+        <span class="result" id="holidaynonResult"></span>
+      </div>
+
+    <div class="total-box" id="totalBox">
+      Total Salary = $0.00 | ฿0.00
+    </div>
+    <div class="exchange" id="exchangeRate">
+      Exchange rate: 1 SGD = ... THB
+    </div>
+  </div>
+
+  <script>
+    let exchangeRate = 25; // default
+
+    async function fetchExchangeRate() {
+      try {
+        let res = await fetch("https://api.exchangerate-api.com/v4/latest/SGD");
+        let data = await res.json();
+        exchangeRate = data.rates.THB;
+        document.getElementById("exchangeRate").innerText = `Exchange rate: 1 SGD = ${exchangeRate.toFixed(2)} THB`;
+        calculate();
+      } catch (e) {
+        document.getElementById("exchangeRate").innerText = `Exchange rate: 1 SGD = ${exchangeRate} THB (default)`;
+      }
+    }
+
+    function calculate() {
+      const salary = parseFloat(document.getElementById("salary").value) || 0;
+      const dayShift = parseFloat(document.getElementById("dayShift").value) || 0;
+      const nightShift = parseFloat(document.getElementById("nightShift").value) || 0;
+      const allowan = parseFloat(document.getElementById("allowan").value) || 0;
+      const bonus = parseFloat(document.getElementById("bonus").value) || 0;
+      const other = parseFloat(document.getElementById("other").value) || 0;
+      const ot15 = parseFloat(document.getElementById("ot15").value) || 0;
+      const ot20 = parseFloat(document.getElementById("ot20").value) || 0;
+      const holiday = parseFloat(document.getElementById("holiday").value) || 0;
+      const holidaynon = parseFloat(document.getElementById("holidaynon").value) || 0;
+
+      const dayShiftPay = dayShift * 12;
+      const nightShiftPay = nightShift * 28;
+      const ot15Pay = ot15 * salary * 12 * 1.5 * 11.5/2288;
+      const ot20Pay = ot20 * salary * 12 * 2.0/182;
+      const holidayPay = holiday * salary * 12 * 1.5 * 11.5/2288;
+      const holidaynonPay = holidaynon * salary * 12/182;
+
+      document.getElementById("dayShiftResult").innerText = `day = $${dayShiftPay.toFixed(2)}`;
+      document.getElementById("nightShiftResult").innerText = `day = $${nightShiftPay.toFixed(2)}`;
+      document.getElementById("ot15Result").innerText = `day = $${ot15Pay.toFixed(2)}`;
+      document.getElementById("ot20Result").innerText = `day = $${ot20Pay.toFixed(2)}`;
+      document.getElementById("holidayResult").innerText = `day = $${holidayPay.toFixed(2)}`;
+      document.getElementById("holidaynonResult").innerText = `day = $${holidaynonPay.toFixed(2)}`;
+
+      const totalUSD = salary + dayShiftPay + nightShiftPay + allowan + bonus + other + ot15Pay + ot20Pay + holidayPay;
+      const totalTHB = totalUSD * exchangeRate;
+
+      document.getElementById("totalBox").innerText = `Total Salary = $${totalUSD.toFixed(2)} | ฿${totalTHB.toFixed(2)}`;
+    }
+
+    document.querySelectorAll("input").forEach(inp => inp.addEventListener("input", calculate));
+    fetchExchangeRate();
+    calculate();
+  </script>
+</body>
+</html>
